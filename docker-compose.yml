@@ -1,0 +1,40 @@
+version: "3.8"
+
+services:
+	caddy:
+		image: caddy:latest
+		restart: unless-stopped
+		ports:
+			- "80:80"
+			- "443:443"
+		volumes:
+			- ./Caddyfile:/etc/caddy/Caddyfile
+		depends_on:
+			- app1
+			- app2
+	
+	app1:
+		build: ./app
+		expose:
+			- "5000"
+	
+	app2:
+		build: ./app
+		expose:
+			- "5000"
+	
+	authelia:
+		build: ./authelia
+		expose: "9091"	
+
+	Worker:
+		build: ./worker
+	
+	EMQX:
+		build: ./MessageBroker
+		expose:
+			- "1883"
+# volumes: non ci servono per ora. decommentare se da usare
+	
+
+# networks: decommentare se il prof chiede reti separate
