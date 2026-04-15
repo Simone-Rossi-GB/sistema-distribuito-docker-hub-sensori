@@ -11,15 +11,26 @@
 	}
 }
 
-@publish path /publish
+(reverse_proxy_apps_snippet) {
+    reverse_proxy app1:5000 app2:5000 {
+		lb_policy round_robin
+	}
+}
+
 
 # endpoint protetto al load-balancer dei server della webapp
 :80 {
+
+    # path /
+    handle {
+        import reverse_proxy_apps_snippet
+    }
+
+    @publish path /publish
+
 	handle @publish {
 		import authelia_auth
-		reverse_proxy app1:5000 app2:5000 {
-			lb_policy round_robin
-		}
+		import reverse_proxy_apps_snippet
 	}
 }
 

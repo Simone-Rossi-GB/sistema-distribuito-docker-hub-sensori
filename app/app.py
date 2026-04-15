@@ -12,6 +12,13 @@ def handle_publish(data):
 if __name__ == "__main__":
     app = Flask(__name__)
 
+    @app.get("/")
+    def health():
+        return jsonify({
+                "status": 200,
+                "message": "alive"
+            })
+
     @app.post("/publish")
     def publish():
         data = request.get_json()
