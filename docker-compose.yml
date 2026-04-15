@@ -3,65 +3,63 @@ version: "3.8"
 name: smartcity
 
 services:
-	caddy:
-		image: caddy:latest
-		restart: unless-stopped
-		networks:
-          - smartcity-net
-		ports:
-			- "80:80"
-			- "443:443"
-		volumes:
-			- ./Caddyfile:/etc/caddy/Caddyfile
-		depends_on:
-			- app1
-			- app2
-			- authelia
-	
-	app1:
-		build: ./app
-		networks:
-			- smartcity-net
-		expose:
-			- "5000"
-	
-	app2:
-		build: ./app
-		networks:
-			- smartcity-net
-		expose:
-			- "5000"
-	
-	authelia:
-		image: authelia/authelia:latest
-		volumes:
-			- ./authelia/configuration.yml:/config/configuration.yml
-			- ./authelia/users_database.yml:/config/users_database.yml
-		networks:
-			- smartcity-net
-		ports:
-			- "9091:9091"
+  caddy:
+    image: caddy:latest
+    restart: unless-stopped
+    networks:
+      - smartcity-net
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile
+    depends_on:
+      - app1
+      - app2
+      - authelia
 
-	worker:
-		build: ./worker
-		networks:
-			- smartcity-net
-		expose:
-			- "9000"
-		depends_on:
-			- emqx
-	
-	emqx:
-		image: emqx/emqx:latest
-		networks:
-			- smartcity-net
-		ports:
-			- "18083:18083"
-		expose:
-			- "1883"
-# volumes: non ci servono per ora. decommentare se da usare
-	
+  app1:
+    build: ./app
+    networks:
+      - smartcity-net
+    expose:
+      - "5000"
+
+  app2:
+    build: ./app
+    networks:
+      - smartcity-net
+    expose:
+      - "5000"
+
+  authelia:
+    image: authelia/authelia:latest
+    volumes:
+      - ./authelia/configuration.yml:/config/configuration.yml
+      - ./authelia/users_database.yml:/config/users_database.yml
+    networks:
+      - smartcity-net
+    expose:
+      - "9091"
+
+  worker:
+    build: ./worker
+    networks:
+      - smartcity-net
+    depends_on:
+      - emqx
+
+  emqx:
+    image: emqx/emqx:latest
+    networks:
+      - smartcity-net
+    ports:
+      - "18083:18083"
+    expose:
+      - "1883"
+
+# volumes: non ci servono per ora. decommentare se da usare
 
 networks:
-	smartcity-net:
-		driver: bridge
+  smartcity-net:
+    driver: bridge

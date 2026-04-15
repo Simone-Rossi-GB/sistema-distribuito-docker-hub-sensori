@@ -1,12 +1,12 @@
 import json
-
+import socket
 from flask import Flask, request, jsonify
 import paho.mqtt.client as mqtt
 
 def handle_publish(data):
     client = mqtt.Client(mqtt.CallbackAPIVersion.VERSION2)
     client.connect("emqx", 1883, 60)
-    client.publish("notifictions", json.dumps(data))
+    client.publish("notifications", json.dumps(data))
     client.disconnect()
 
 if __name__ == "__main__":
@@ -16,7 +16,8 @@ if __name__ == "__main__":
     def health():
         return jsonify({
                 "status": 200,
-                "message": "alive"
+                "message": "alive",
+                "server": socket.gethostname()
             })
 
     @app.post("/publish")
@@ -33,3 +34,5 @@ if __name__ == "__main__":
                 "status": 500,
                 "message": repr(e)
             })
+
+    app.run(host="0.0.0.0", port=5000)
