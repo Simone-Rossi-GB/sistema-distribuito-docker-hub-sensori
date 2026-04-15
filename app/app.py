@@ -7,6 +7,7 @@ def handle_publish(data):
     client = mqtt.Client(mqtt.CallbackAPIVersion.VERSION2)
     client.connect("emqx", 1883, 60)
     client.publish("notifications", json.dumps(data))
+    client.loop(timeout=1.0)  # aspetta che il messaggio venga consegnato
     client.disconnect()
 
 if __name__ == "__main__":

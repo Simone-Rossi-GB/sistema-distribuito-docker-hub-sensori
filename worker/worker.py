@@ -1,4 +1,5 @@
 import paho.mqtt.client as mqtt
+import time
 
 def connected(client, userdata, flags, reason_code, properties):
     print("connesso al MQTT broker")
@@ -12,5 +13,11 @@ if __name__ == "__main__":
     client = mqtt.Client(mqtt.CallbackAPIVersion.VERSION2)
     client.on_connect = connected
     client.on_message = on_message
-    client.connect("emqx", 1883, 60)
-    client.loop_forever()
+
+    while True:
+        try:
+            client.connect("emqx", 1883, 60)
+            client.loop_forever()
+        except Exception as e:
+            print(f"connessione fallita: {e}. ESSIRIPROVA GUYZ fra 5 secondi...")
+            time.sleep(5)

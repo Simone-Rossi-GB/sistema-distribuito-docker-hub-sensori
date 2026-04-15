@@ -1,5 +1,14 @@
+{
+    default_sni 127.0.0.1
+}
+
 #endpoint authelia
-:9091 {
+https://127.0.0.1:9091 {
+    tls {
+        issuer internal
+        protocols tls1.2 tls1.3
+    }
+
 	reverse_proxy authelia:9091
 }
 
@@ -19,7 +28,11 @@
 
 
 # endpoint protetto al load-balancer dei server della webapp
-:80 {
+https://127.0.0.1 {
+    tls {
+        issuer internal
+        protocols tls1.2 tls1.3
+    }
 
     # path /
     handle {
@@ -35,7 +48,12 @@
 }
 
 # endpoint protetto alla dashboard emqx
-:18083 {
+https://127.0.0.1:18083 {
+    tls {
+        issuer internal
+        protocols tls1.2 tls1.3
+    }
+
 	import authelia_auth
 	reverse_proxy emqx:18083
 }

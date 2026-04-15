@@ -9,10 +9,13 @@ services:
     networks:
       - smartcity-net
     ports:
-      - "80:80"
       - "443:443"
+      - "9091:9091"
+      - "18083:18083"
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile
+      - caddy_data:/data
+      - caddy_config:/config
     depends_on:
       - app1
       - app2
@@ -53,12 +56,13 @@ services:
     image: emqx/emqx:latest
     networks:
       - smartcity-net
-    ports:
-      - "18083:18083"
     expose:
+      - "18083"
       - "1883"
 
-# volumes: non ci servono per ora. decommentare se da usare
+volumes:
+  caddy_data:
+  caddy_config:
 
 networks:
   smartcity-net:
