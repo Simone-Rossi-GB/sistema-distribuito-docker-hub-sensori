@@ -1,11 +1,13 @@
 version: "3.8"
 
+name: smartcity
+
 services:
 	caddy:
 		image: caddy:latest
 		restart: unless-stopped
 		networks:
-\			- smartcity-net
+          - smartcity-net
 		ports:
 			- "80:80"
 			- "443:443"
@@ -46,6 +48,8 @@ services:
 			- smartcity-net
 		expose:
 			- "9000"
+		depends_on:
+			- emqx
 	
 	emqx:
 		image: emqx/emqx:latest
