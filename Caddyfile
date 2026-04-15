@@ -1,3 +1,26 @@
+#endpoint authelia
+:9091 {
+	reverse_proxy authelia:9091
+}
+
+# snippet auth verso webapp
+(authelia_auth) {
+	forward_auth authelia:9091 {
+		uri /api/authz/forward-auth
+		copy_headers Remote-User Remote-Groups Remote-Email Remote-Name
+	}
+}
+
+# endpoint protetto al load-balancer dei server della webapp
 :80 {
-	forward_auth
+	import authelia_auth
+	reverse_proxy app1:5000 app2:5000 {
+		lb_policy round_robin
+	}
+}
+
+# endpoint protetto alla dashboard emqx
+:18083 {
+	import authelia_auth
+	reverse_proxy emqx:18083
 }
