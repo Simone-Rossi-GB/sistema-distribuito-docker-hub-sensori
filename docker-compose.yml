@@ -60,3 +60,4 @@ services:
 
 networks:
 	smartcity-net:
+		driver: bridge
