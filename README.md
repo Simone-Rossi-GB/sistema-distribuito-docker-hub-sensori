@@ -99,6 +99,13 @@ docker compose logs -f worker
 curl -X POST http://localhost/publish \
   -H "Content-Type: application/json" \
   -d '{"sensore": "temperatura", "valore": 22.5}'
+
+# Invia un messaggio di test alla rotta /publish tramite token di sessione da strumenti per sviluppatore
+fetch('https://127.0.0.1/publish', {
+  method: 'POST',
+  headers: {'Content-Type': 'application/json'},
+  body: JSON.stringify({sensor: 'temperatura', value: 23.5})
+}).then(r => r.json()).then(console.log)
 ```
 
 ## Credenziali di Test
