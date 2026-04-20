@@ -1,124 +1,96 @@
-# Smart City Hub: Infrastruttura Distribuita per Sensoristica IoT
+# Smart City Hub — Distributed IoT Sensor Platform
 
-## Descrizione del Progetto
+A microservices architecture for collecting and analyzing real-time data from IoT environmental sensors in a smart city scenario.
 
-Piattaforma distribuita a microservizi per raccogliere e analizzare in tempo reale
-i dati provenienti da sensori ambientali IoT di una smart city.
+![Python](https://img.shields.io/badge/Python-3776AB?style=flat-square&logo=python&logoColor=white)
+![Flask](https://img.shields.io/badge/Flask-000000?style=flat-square&logo=flask&logoColor=white)
+![Docker](https://img.shields.io/badge/Docker-2496ED?style=flat-square&logo=docker&logoColor=white)
+![MQTT](https://img.shields.io/badge/MQTT-660066?style=flat-square&logo=eclipse-mosquitto&logoColor=white)
 
-L'architettura è composta da:
-- **Caddy** — API Gateway, reverse proxy e load balancer
-- **Flask** (2 repliche) — Webapp per l'interfaccia utente e l'invio dati
-- **EMQX** — Broker MQTT per la comunicazione asincrona IoT
-- **Worker Python** — Microservizio per l'elaborazione dei messaggi MQTT
-- **Authelia** — Forward authentication per proteggere le rotte sensibili
+---
 
-## Architettura
+## Architecture
 
 ```
-                    ┌─────────────────────────────────────────────┐
-                    │            Rete Docker: smartcity-net        │
-  Browser :80 ───►  │  Caddy ──┬──► app1:5000 (Flask)             │
-                    │          └──► app2:5000 (Flask)             │
-                    │                    │                         │
-                    │          forward_auth                        │
-                    │          ┌──► Authelia:9091                  │
-                    │          │                                   │
-                    │          EMQX:1883 (MQTT interno)            │
-                    │              │                               │
-                    │          Worker (subscriber)                 │
-                    └─────────────────────────────────────────────┘
+Browser :80 ──► Caddy (API Gateway + Load Balancer)
+                    ├──► app1:5000 (Flask)
+                    └──► app2:5000 (Flask)
+                              │
+                         Forward Auth
+                         └──► Authelia:9091
+                              │
+                         EMQX:1883 (MQTT Broker)
+                              │
+                         Worker (MQTT Subscriber)
 ```
 
-## Prerequisiti
+| Component | Role |
+|-----------|------|
+| **Caddy** | Reverse proxy, load balancer, API gateway |
+| **Flask** (×2 replicas) | Web app and REST API for sensor data |
+| **EMQX** | MQTT broker for async IoT communication |
+| **Worker** | Python microservice that processes MQTT messages |
+| **Authelia** | Forward authentication to protect sensitive routes |
 
-| Strumento | Scopo |
-|-----------|-------|
-| **Docker Desktop** | Esecuzione dei container |
-| **VS Code** | Editor di codice (estensione Docker consigliata) |
-| **Browser** | Accesso all'interfaccia web |
-| **curl / Postman** | Test delle API REST |
+---
 
-## Struttura del Progetto
+## Tech Stack
 
-```
-.
-├── docker-compose.yml          # Orchestrazione dei servizi
-├── Caddyfile                   # Configurazione reverse proxy
-├── webapp/
-│   ├── Dockerfile              # Immagine Docker della webapp
-│   ├── requirements.txt        # Dipendenze Python
-│   ├── app.py                  # Applicazione Flask
-│   └── templates/
-│       └── index.html          # Interfaccia utente
-├── worker/
-│   ├── Dockerfile              # Immagine Docker del worker (TODO)
-│   ├── requirements.txt        # Dipendenze Python
-│   └── worker.py               # Subscriber MQTT (TODO)
-├── authelia/
-│   ├── configuration.yml       # Configurazione Authelia (fornito)
-│   └── users_database.yml      # Database utenti (fornito)
-└── docs/
-    ├── guida-step-by-step.md   # Guida implementativa dettagliata
-    └── report-template.md      # Template per il report (Parte B)
-```
+![Python](https://img.shields.io/badge/Python-3776AB?style=flat-square&logo=python&logoColor=white)
+![Flask](https://img.shields.io/badge/Flask-000000?style=flat-square&logo=flask&logoColor=white)
+![Docker](https://img.shields.io/badge/Docker-2496ED?style=flat-square&logo=docker&logoColor=white)
+![Caddy](https://img.shields.io/badge/Caddy-1F88C0?style=flat-square&logo=caddy&logoColor=white)
 
-## Come Procedere
+---
 
-### Fasi di implementazione
-
-| Fase | Descrizione | File da modificare |
-|------|-------------|-------------------|
-| **Fase 1** | Bilanciamento del carico | `docker-compose.yml`, `Caddyfile` |
-| **Fase 2** | Comunicazione MQTT | `docker-compose.yml`, `webapp/app.py` |
-| **Fase 3** | Worker di elaborazione | `worker/Dockerfile`, `worker/worker.py`, `docker-compose.yml` |
-| **Fase 4** | Forward Authentication | `docker-compose.yml`, `Caddyfile` |
-
-### Istruzioni
-
-1. Leggi la guida dettagliata in `docs/guida-step-by-step.md`
-2. Completa i file contrassegnati con `TODO` seguendo l'ordine delle fasi
-3. Testa ogni fase prima di passare alla successiva
-4. Compila il report tecnico in `docs/report-template.md`
-
-## Comandi Rapidi
+## Quick Start
 
 ```bash
-# Avvia tutti i servizi (ricostruendo le immagini)
+# Start all services (rebuilds images)
 docker compose up --build
 
-# Ferma tutti i servizi
+# Stop all services
 docker compose down
 
-# Reset completo (rimuove anche i volumi)
+# Full reset (removes volumes)
 docker compose down -v
 
-# Visualizza i log di un servizio specifico
+# View logs for a specific service
 docker compose logs -f worker
+```
 
-# Invia un messaggio di test alla rotta /publish
+### Send a test sensor reading
+
+```bash
 curl -X POST http://localhost/publish \
   -H "Content-Type: application/json" \
   -d '{"sensore": "temperatura", "valore": 22.5}'
-
-# Invia un messaggio di test alla rotta /publish tramite token di sessione da strumenti per sviluppatore
-fetch('https://127.0.0.1/publish', {
-  method: 'POST',
-  headers: {'Content-Type': 'application/json'},
-  body: JSON.stringify({sensor: 'temperatura', value: 23.5})
-}).then(r => r.json()).then(console.log)
 ```
 
-## Credenziali di Test
+---
 
-| Servizio | Username | Password |
-|----------|----------|----------|
-| **Authelia** | `studente` | `password123` |
-| **EMQX Dashboard** | `admin` | `public` |
+## Test Credentials
 
-## Porte Esposte
+| Service | Username | Password |
+|---------|----------|----------|
+| Authelia | `studente` | `password123` |
+| EMQX Dashboard | `admin` | `public` |
 
-| Servizio | Porta | URL |
-|----------|-------|-----|
-| Caddy (webapp) | 80 | http://localhost |
+---
+
+## Exposed Ports
+
+| Service | Port | URL |
+|---------|------|-----|
+| Caddy (web app) | 80 | http://localhost |
 | EMQX Dashboard | 18083 | http://localhost:18083 |
 | Authelia | 9091 | http://localhost:9091 |
+
+---
+
+## Project context
+
+School project at IIS B. Castelli, Brescia.  
+The assignment covered load balancing, asynchronous MQTT communication, microservice architecture, and forward authentication — all running locally in Docker.
+
+**Author:** Simone Rossi
